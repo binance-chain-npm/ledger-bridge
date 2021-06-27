@@ -50,7 +50,7 @@ class FirefoxU2f {
     this.hdPath = hdPath;
   }
 
-  unlock(hdPath?: string) {
+  unlock(hdPath?: string): Promise<string> {
     if (this.isUnlocked() && !hdPath) {
       return Promise.resolve('already unlocked');
     }
@@ -200,7 +200,7 @@ class FirefoxU2f {
       const address = await this.unlock(path);
       accounts.push({
         address,
-        balance: null,
+        balance: 0,
         index: i,
       });
     }
@@ -214,7 +214,7 @@ class FirefoxU2f {
       const address = this._addressFromIndex(pathBase, i);
       accounts.push({
         address,
-        balance: null,
+        balance: 0,
         index: i,
       });
       this.paths[ethUtil.toChecksumAddress(address)] = i;

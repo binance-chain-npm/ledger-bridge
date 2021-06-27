@@ -74,8 +74,8 @@ class ChromeUsbBridge {
     return accounts.map((address, index) => {
       return {
         address: address,
+        balance: 0,
         index: index,
-        balance: null,
       };
     });
   }

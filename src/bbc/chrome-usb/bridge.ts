@@ -1,5 +1,6 @@
 import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
 import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
+import Transport from '@ledgerhq/hw-transport';
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import {
   DEFAULT_GET_ADDRESSES_LIMIT,
@@ -8,12 +9,12 @@ import {
 } from '../constants';
 
 export class LedgerBridge {
-  private app: LedgerApp | null;
-  private transport: any;
+  private app: LedgerApp;
+  private transport: Transport;
 
   constructor() {
-    this.app = null;
-    this.transport = null;
+    this.app = {} as LedgerApp;
+    this.transport = {} as Transport;
   }
 
   async makeApp() {
@@ -27,27 +28,29 @@ export class LedgerBridge {
       );
     } catch (e) {
       console.error('LEDGER:::CREATE APP ERROR', e);
-      throw new Error(this.ledgerErrToMessage(e));
+      throw e;
     }
   }
 
   async cleanUp() {
-    this.app = null;
-    await this.transport.close();
+    this.app = {} as LedgerApp;
+    try {
+      this.transport?.close && (await this.transport.close());
+    } catch (e) {
+      // ignore error.
+      console.warn(e);
+    }
   }
 
   async unlock(hdPath: string, hrp: string) {
     try {
-      console.log('start make ledger app');
       await this.makeApp();
-      const res = await this.getAddresses({
+      return await this.getAddresses({
         hdPathStart: hdPath.split(',').map((item) => Number(item)),
         hrp,
       });
-      return res;
     } catch (err) {
-      console.error(err);
-      return Promise.reject(this.ledgerErrToMessage(err));
+      throw new Error(this.ledgerErrToMessage(err));
     } finally {
       await this.cleanUp();
     }
@@ -61,22 +64,20 @@ export class LedgerBridge {
       const pubKeyResp = await this.mustHaveApp().getPublicKey(path);
       const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
       const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), path);
-      console.log(res);
 
       return {
         signature: res?.signature?.toString('hex'),
         pubkey: pubKey.encode('hex', true),
       };
     } catch (err) {
-      console.log(err);
-      return Promise.reject(this.ledgerErrToMessage(err));
+      throw new Error(this.ledgerErrToMessage(err));
     } finally {
       await this.cleanUp();
     }
   }
 
   mustHaveApp() {
-    if (this.app === null) {
+    if (this.app.getVersion === undefined) {
       throw new Error('LedgerClient: Call makeApp() first');
     }
     return this.app;
@@ -116,21 +117,42 @@ export class LedgerBridge {
   }
 
   ledgerErrToMessage(err: any) {
-    const errMsg = err.message;
-    const isRequireGesture = (e: Error) => e.name === 'TransportWebUSBGestureRequired';
+    const isStringError = (e: any) => typeof e === 'string';
+    const isErrorWithId = (e: any) => e.hasOwnProperty('id') && e.hasOwnProperty('message');
+    const isWrongAppError = (e: any) => {
+      const m = String(e.message || e);
+      return m.includes('0x6700') || m.includes('0x6e00');
+    };
+    const isLedgerLockedError = (e: any) => {
+      const m = String(e.message || e);
+      return m.includes('OpenFailed') || m.includes('0x6804');
+    };
+    const isRequireGesture = (e: any) => {
+      const m = String(e.name || e);
+      return m === 'TransportWebUSBGestureRequired' || m === 'TransportOpenUserCancelled';
+    };
 
+    if (__DEV__) console.error('error: ', err);
     if (isRequireGesture(err)) {
       return 'LEDGER_NEED_USB_PERMISSION';
     }
 
-    if (errMsg.includes('6804')) {
+    if (isWrongAppError(err)) {
+      return 'LEDGER_WRONG_APP';
+    }
+
+    if (isLedgerLockedError(err) || (isStringError(err) && err.includes('6801'))) {
       return 'LEDGER_LOCKED';
     }
 
-    if (errMsg.includes('6986')) {
-      return 'Transaction rejected';
+    if (isErrorWithId(err)) {
+      // Browser doesn't support U2F
+      if (err.message.includes('U2F not supported')) {
+        return 'U2F_NOT_SUPPORTED';
+      }
     }
 
-    return errMsg.toString();
+    // Other
+    return err.toString();
   }
 }

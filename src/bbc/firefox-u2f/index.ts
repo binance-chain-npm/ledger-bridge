@@ -104,7 +104,7 @@ class FirefoxU2fBridge {
       return {
         address: address,
         index: index,
-        balance: null,
+        balance: 0,
       };
     });
   }

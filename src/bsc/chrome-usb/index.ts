@@ -119,7 +119,7 @@ class ChromeUsbBridge {
       const address = await this.unlock(path);
       accounts.push({
         address,
-        balance: null,
+        balance: 0,
         index: i,
       });
     }
@@ -133,7 +133,7 @@ class ChromeUsbBridge {
       const address = this._addressFromIndex(pathBase, i);
       accounts.push({
         address,
-        balance: null,
+        balance: 0,
         index: i,
       });
       this.paths[ethUtil.toChecksumAddress(address)] = i;
