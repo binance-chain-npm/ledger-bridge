@@ -1,0 +1,72 @@
+{
+  "name": "@binance-chain/ledger-bridge",
+  "version": "0.0.2",
+  "description": "A project for Ledger bridge",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/ledger.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "lint": "tsdx lint",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "test:watch": "parcel test/index.html --dist-dir public",
+    "prepublish": "yarn build"
+  },
+  "peerDependencies": {},
+  "author": "robot-ux",
+  "devDependencies": {
+    "@binance-chain/commitlint-config": "^0.2.1",
+    "@binance-chain/prettier-config": "^1.0.1",
+    "@size-limit/preset-small-lib": "^4.10.2",
+    "husky": "4.3.8",
+    "parcel": "^2.0.0-beta.2",
+    "size-limit": "^4.10.2",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4"
+  },
+  "prettier": "@binance-chain/prettier-config",
+  "commitlint": {
+    "extends": [
+      "@binance-chain/commitlint-config"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "size-limit": [
+    {
+      "path": "dist/ledger.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/ledger.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "dependencies": {
+    "@binance-chain/javascript-sdk": "^4.1.1",
+    "@ledgerhq/hw-app-eth": "^6.0.2",
+    "@ledgerhq/hw-transport": "^6.0.2",
+    "@ledgerhq/hw-transport-webusb": "^6.0.2",
+    "ethereumjs-tx": "1.3.7",
+    "ethereumjs-util": "^7.0.10",
+    "hdkey": "^2.0.1"
+  }
+}
