@@ -1,6 +1,6 @@
 {
   "name": "@binance-chain/ledger-bridge",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "A project for Ledger bridge",
   "license": "MIT",
   "main": "dist/index.js",
@@ -19,7 +19,7 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "lint": "tsdx lint",
+    "lint": "tsdx lint src",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "test:watch": "parcel test/index.html --dist-dir public",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@binance-chain/commitlint-config": "^0.2.1",
     "@binance-chain/prettier-config": "^1.0.1",
+    "@commitlint/cli": "^12.1.4",
     "@size-limit/preset-small-lib": "^4.10.2",
     "husky": "4.3.8",
     "parcel": "^2.0.0-beta.2",
