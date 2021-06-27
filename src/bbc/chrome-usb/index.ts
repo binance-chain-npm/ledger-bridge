@@ -70,8 +70,8 @@ class ChromeUsbBridge {
     const from = (this.page - 1) * this.perPage;
     this.hdPath.splice(this.hdPath.length - 1, 1, from);
 
-    const accounts = (await this.unlock()) as [];
-    return accounts?.map((address, index) => {
+    const accounts = (await this.unlock()) || [];
+    return accounts.map((address, index) => {
       return {
         address: address,
         index: index,
