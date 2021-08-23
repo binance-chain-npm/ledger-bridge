@@ -2,6 +2,8 @@ import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
 import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
 import Transport from '@ledgerhq/hw-transport';
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
+import sha256 from 'fast-sha256';
+import { toUTF8Array } from '../../utils/toUtf8Array';
 import {
   DEFAULT_GET_ADDRESSES_LIMIT,
   DEFAULT_LEDGER_INTERACTIVE_TIMEOUT,
@@ -42,11 +44,11 @@ export class LedgerBridge {
     }
   }
 
-  async unlock(hdPath: string, hrp: string) {
+  async unlock(hdPath: number[], hrp: string) {
     try {
       await this.makeApp();
       return await this.getAddresses({
-        hdPathStart: hdPath.split(',').map((item) => Number(item)),
+        hdPathStart: hdPath,
         hrp,
       });
     } catch (err) {
@@ -56,14 +58,13 @@ export class LedgerBridge {
     }
   }
 
-  async signTransaction(hdPath: string, tx: any, hrp: string = 'bnb') {
+  async signTransaction(hdPath: number[], tx: any, hrp: string = 'bnb') {
     try {
       await this.makeApp();
-      const path = hdPath.split(',').map((item) => Number(item));
-      await this.mustHaveApp().showAddress(hrp, path);
-      const pubKeyResp = await this.mustHaveApp().getPublicKey(path);
+      await this.mustHaveApp().showAddress(hrp, hdPath);
+      const pubKeyResp = await this.mustHaveApp().getPublicKey(hdPath);
       const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
-      const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), path);
+      const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), hdPath);
 
       return {
         signature: res?.signature?.toString('hex'),

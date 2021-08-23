@@ -28,14 +28,14 @@ class ChromeUsbBridge {
   }
 
   unlock(): Promise<Array<string>> {
-    return this.bridge.unlock(this.hdPath.toString(), this.hrp);
+    return this.bridge.unlock(this.hdPath, this.hrp);
   }
 
   signTransaction(tx: Transaction, hdPath: Array<number>): Promise<Transaction> {
     const signBytes = tx.getSignBytes();
 
     return this.bridge
-      .signTransaction(hdPath.toString(), signBytes.toString('hex'), this.hrp)
+      .signTransaction(hdPath, signBytes.toString('hex'), this.hrp)
       .then((payload: any) => {
         const pubKey = crypto.getPublicKey(payload.pubkey);
         tx.addSignature(pubKey, Buffer.from(payload.signature, 'hex'));
@@ -46,6 +46,11 @@ class ChromeUsbBridge {
           new Error(e.message || 'Ledger: Unknown error while signing transaction'),
         );
       });
+  }
+
+  async signMessage(hdPath: number[], message: string) {
+    console.warn(hdPath, message);
+    throw new Error('signMessage: Not support');
   }
 
   getFirstPage() {

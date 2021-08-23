@@ -1,5 +1,6 @@
 import HDKey from 'hdkey';
 import ethUtil from 'ethereumjs-util';
+import sigUtil from 'eth-sig-util';
 import { LedgerBridge } from './bridge';
 
 const pathBase = 'm';
@@ -68,13 +69,7 @@ class ChromeUsbBridge {
       tx.r = '0x00';
       tx.s = '0x00';
 
-      let hdPath;
-      if (this._isLedgerLiveHdPath()) {
-        const index = accountIndex;
-        hdPath = this._getPathForIndex(index);
-      } else {
-        hdPath = this._toLedgerPath(this._pathFromAddress(address));
-      }
+      const hdPath = this._getExactHdPath(address, accountIndex);
 
       return this.bridge
         .signTransaction(
@@ -89,6 +84,38 @@ class ChromeUsbBridge {
           return tx;
         });
     });
+  }
+
+  async signMessage(address: string, message: string, accountIndex: number) {
+    return this.unlock().then(async (_: any) => {
+      const payload = await this.bridge.signPersonalMessage(
+        this._getExactHdPath(address, accountIndex),
+        ethUtil.stripHexPrefix(message),
+      );
+
+      let v = (payload.v - 27).toString(16);
+      if (v.length < 2) {
+        v = `0${v}`;
+      }
+      const signature = `0x${payload.r}${payload.s}${v}`;
+      const addressSignedWith = sigUtil.recoverPersonalSignature({ data: message, sig: signature });
+      if (ethUtil.toChecksumAddress(addressSignedWith) !== ethUtil.toChecksumAddress(address)) {
+        new Error('Ledger: The signature doesnt match the right address');
+      }
+      return signature;
+    });
+  }
+
+  _getExactHdPath(address: string, accountIndex: number) {
+    let hdPath;
+    if (this._isLedgerLiveHdPath()) {
+      const index = accountIndex;
+      hdPath = this._getPathForIndex(index);
+    } else {
+      hdPath = this._toLedgerPath(this._pathFromAddress(address));
+    }
+
+    return hdPath;
   }
 
   async __getPage(increment: number) {

@@ -60,6 +60,17 @@ export class LedgerBridge {
     }
   }
 
+  async signPersonalMessage(hdPath: string, message: string) {
+    try {
+      await this.makeApp();
+      return await this.app.signPersonalMessage(hdPath, message);
+    } catch (err) {
+      throw new Error(this.ledgerErrToMessage(err));
+    } finally {
+      await this.cleanUp();
+    }
+  }
+
   ledgerErrToMessage(err: any) {
     const isStringError = (e: any) => typeof e === 'string';
     const isErrorWithId = (e: any) => e.hasOwnProperty('id') && e.hasOwnProperty('message');

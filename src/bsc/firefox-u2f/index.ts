@@ -1,11 +1,13 @@
 import HDKey from 'hdkey';
 import ethUtil from 'ethereumjs-util';
+import sigUtil from 'eth-sig-util';
 
 const pathBase = 'm';
 const hdPathString = `${pathBase}/44'/60'/0'`;
 const type = 'Ledger Hardware';
 
-const BRIDGE_URL = 'https://metamask.github.io/eth-ledger-bridge-keyring';
+const BRIDGE_URL = 'https://localhost:5000/dist/gh/bsc/';
+// const BRIDGE_URL = 'https://metamask.github.io/eth-ledger-bridge-keyring';
 
 const MAX_INDEX = 1000;
 const NETWORK_API_URLS = {
@@ -101,14 +103,7 @@ class FirefoxU2f {
           tx.r = '0x00';
           tx.s = '0x00';
 
-          let hdPath;
-          if (this._isLedgerLiveHdPath()) {
-            const index = accountIndex;
-            hdPath = this._getPathForIndex(index);
-          } else {
-            hdPath = this._toLedgerPath(this._pathFromAddress(address));
-          }
-
+          const hdPath = this._getExactHdPath(address, accountIndex);
           this._sendMessage(
             {
               action: 'ledger-sign-transaction',
@@ -139,7 +134,63 @@ class FirefoxU2f {
     });
   }
 
+  async signMessage(address: string, message: string, accountIndex: number) {
+    return new Promise((resolve, reject) => {
+      this.unlock()
+        .then(async (_: any) => {
+          const hdPath = this._getExactHdPath(address, accountIndex);
+
+          return this._sendMessage(
+            {
+              action: 'ledger-sign-personal-message',
+              params: {
+                hdPath,
+                message: ethUtil.stripHexPrefix(message),
+              },
+            },
+            ({ success, payload }: { success: boolean; payload: any }) => {
+              if (success) {
+                let v = (payload.v - 27).toString(16);
+                if (v.length < 2) {
+                  v = `0${v}`;
+                }
+                const signature = `0x${payload.r}${payload.s}${v}`;
+                const addressSignedWith = sigUtil.recoverPersonalSignature({
+                  data: message,
+                  sig: signature,
+                });
+                if (
+                  ethUtil.toChecksumAddress(addressSignedWith) !==
+                  ethUtil.toChecksumAddress(address)
+                ) {
+                  reject(new Error('Ledger: The signature doesnt match the right address'));
+                }
+                resolve(signature);
+              } else {
+                reject(new Error(payload.error || 'Ledger: Unknown error while signing message'));
+              }
+            },
+          );
+        })
+        .catch((err) => {
+          throw err;
+        });
+    });
+  }
+
   /* PRIVATE METHODS */
+
+  _getExactHdPath(address: string, accountIndex: number) {
+    let hdPath;
+    if (this._isLedgerLiveHdPath()) {
+      const index = accountIndex;
+      hdPath = this._getPathForIndex(index);
+    } else {
+      hdPath = this._toLedgerPath(this._pathFromAddress(address));
+    }
+
+    return hdPath;
+  }
 
   _setupIframe() {
     this.iframe = document.createElement('iframe');
@@ -148,9 +199,10 @@ class FirefoxU2f {
   }
 
   _getOrigin() {
-    const tmp = this.bridgeUrl.split('/');
-    tmp.splice(-1, 1);
-    return tmp.join('/');
+    return this.bridgeUrl
+      .split('/')
+      .slice(0, 3)
+      .join('/');
   }
 
   _sendMessage(msg: any, cb: Function) {

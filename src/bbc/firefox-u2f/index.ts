@@ -1,7 +1,7 @@
 import { crypto, Transaction } from '@binance-chain/javascript-sdk';
 
 const DEFAULT_HD_PATH = [44, 714, 0, 0, 0];
-const BRIDGE_URL = 'https://binance-chain-npm.github.io/bc-ledger-bridge';
+const BRIDGE_URL = 'https://localhost:5000/dist/gh/bbc/';
 
 class FirefoxU2fBridge {
   hdPath: Array<number>;
@@ -77,6 +77,11 @@ class FirefoxU2fBridge {
     });
   }
 
+  async signMessage(hdPath: number[], message: string) {
+    console.warn(hdPath, message);
+    throw new Error('signPersonalMessage: Not support');
+  }
+
   getFirstPage() {
     this.page = 0;
     return this.__getPage(1);
@@ -116,9 +121,10 @@ class FirefoxU2fBridge {
   }
 
   _getOrigin() {
-    var tmp = this.bridgeUrl.split('/');
-    tmp.splice(-1, 1);
-    return tmp.join('/');
+    return this.bridgeUrl
+      .split('/')
+      .slice(0, 3)
+      .join('/');
   }
 
   _sendMessage(msg: any, cb: any) {
