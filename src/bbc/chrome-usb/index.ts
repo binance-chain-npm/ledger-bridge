@@ -48,7 +48,7 @@ class ChromeUsbBridge {
       });
   }
 
-  async signMessage(hdPath: number[], message: string) {
+  async signMessage(hdPath: number[], message: string): Promise<string> {
     console.warn(hdPath, message);
     throw new Error('signMessage: Not support');
   }

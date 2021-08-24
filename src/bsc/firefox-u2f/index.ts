@@ -155,7 +155,7 @@ class FirefoxU2f {
     });
   }
 
-  async signMessage(address: string, message: string, accountIndex: number) {
+  async signMessage(address: string, message: string, accountIndex: number): Promise<string> {
     return new Promise((resolve, reject) => {
       this.unlock()
         .then(async (_: any) => {

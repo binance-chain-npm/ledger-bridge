@@ -78,7 +78,7 @@ class FirefoxU2fBridge {
     });
   }
 
-  async signMessage(hdPath: number[], message: string) {
+  async signMessage(hdPath: number[], message: string): Promise<string> {
     console.warn(hdPath, message);
     throw new Error('signPersonalMessage: Not support');
   }
