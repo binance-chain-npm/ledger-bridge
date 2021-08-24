@@ -52,6 +52,27 @@ class FirefoxU2f {
     this.hdPath = hdPath;
   }
 
+  async getPublicKey(address: string, accountIndex: number) {
+    const hdPath = this._getExactHdPath(address, accountIndex);
+    return new Promise((resolve, reject) => {
+      this._sendMessage(
+        {
+          action: 'ledger-unlock',
+          params: {
+            hdPath,
+          },
+        },
+        ({ success, payload }: { success: boolean; payload: any }) => {
+          if (success) {
+            resolve(payload.publicKey);
+          } else {
+            reject(payload.error || 'Unknown error');
+          }
+        },
+      );
+    });
+  }
+
   unlock(hdPath?: string): Promise<string> {
     if (this.isUnlocked() && !hdPath) {
       return Promise.resolve('already unlocked');

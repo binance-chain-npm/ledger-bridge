@@ -1,7 +1,7 @@
 import { BSCLedgerBridge } from '../../dist/';
 import Transaction from 'ethereumjs-tx';
 import { Button, Card, notification, Input } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const hdPaths = {
   LedgerLive: `m/44'/60'/0'/0/0`,
@@ -37,6 +37,12 @@ const GetAddressCard = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      console.log(address && (await bridge.getPublicKey(address, 0)));
+    })();
+  }, [address]);
 
   return (
     <Card

@@ -106,6 +106,11 @@ class ChromeUsbBridge {
     });
   }
 
+  async getPublicKey(address: string, accountIndex: number) {
+    const hdPath = this._getExactHdPath(address, accountIndex);
+    return await (await this.bridge.unlock(hdPath)).publicKey;
+  }
+
   _getExactHdPath(address: string, accountIndex: number) {
     let hdPath;
     if (this._isLedgerLiveHdPath()) {
