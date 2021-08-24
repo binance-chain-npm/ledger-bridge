@@ -2,8 +2,6 @@ import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
 import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
 import Transport from '@ledgerhq/hw-transport';
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
-import sha256 from 'fast-sha256';
-import { toUTF8Array } from '../../utils/toUtf8Array';
 import {
   DEFAULT_GET_ADDRESSES_LIMIT,
   DEFAULT_LEDGER_INTERACTIVE_TIMEOUT,
