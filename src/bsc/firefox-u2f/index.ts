@@ -1,13 +1,13 @@
 import HDKey from 'hdkey';
 import ethUtil from 'ethereumjs-util';
 import sigUtil from 'eth-sig-util';
+import { getBridgeOrigin } from '../../utils/env';
 
 const pathBase = 'm';
 const hdPathString = `${pathBase}/44'/60'/0'`;
 const type = 'Ledger Hardware';
 
-const BRIDGE_URL = 'https://localhost:5000/dist/gh/bsc/';
-// const BRIDGE_URL = 'https://metamask.github.io/eth-ledger-bridge-keyring';
+const BRIDGE_URL = `${getBridgeOrigin()}/bsc/`;
 
 const MAX_INDEX = 1000;
 const NETWORK_API_URLS = {

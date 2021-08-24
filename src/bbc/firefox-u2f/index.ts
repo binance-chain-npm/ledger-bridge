@@ -1,7 +1,8 @@
 import { crypto, Transaction } from '@binance-chain/javascript-sdk';
+import { getBridgeOrigin } from '../../utils/env';
 
 const DEFAULT_HD_PATH = [44, 714, 0, 0, 0];
-const BRIDGE_URL = 'https://localhost:5000/dist/gh/bbc/';
+const BRIDGE_URL = `${getBridgeOrigin()}/bbc/`;
 
 class FirefoxU2fBridge {
   hdPath: Array<number>;

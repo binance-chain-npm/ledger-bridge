@@ -2,6 +2,7 @@ dist
 *.log
 public
 public_recover
+public_test
 .parcel-cache
 .DS_Store
 # Coverage directory used by tools like istanbul
