@@ -52,7 +52,7 @@ class FirefoxU2f {
     this.hdPath = hdPath;
   }
 
-  async getPublicKey(address: string, accountIndex: number) {
+  async getPublicKey(address: string, accountIndex: number): Promise<string> {
     const hdPath = this._getExactHdPath(address, accountIndex);
     return new Promise((resolve, reject) => {
       this._sendMessage(
