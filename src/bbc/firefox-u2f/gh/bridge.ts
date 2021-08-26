@@ -1,7 +1,6 @@
 import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
 import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
 import {
-  DEFAULT_GET_ADDRESSES_LIMIT,
   DEFAULT_LEDGER_INTERACTIVE_TIMEOUT,
   DEFAULT_LEDGER_NONINTERACTIVE_TIMEOUT,
 } from '../../constants';
@@ -65,10 +64,12 @@ export class BcLedgerBridge {
     try {
       console.log('start make ledger app');
       await this.makeApp();
-      const res = await this.getAddresses({
-        hdPathStart: hdPath.split(',').map((item) => Number(item)),
-        hrp,
-      });
+      const _hdPath = this._toPathArray(hdPath);
+      const res = {
+        address: await this.getAddressByHdPath(_hdPath, hrp),
+        publicKey: await this.getPublicKey(_hdPath),
+      };
+
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
@@ -92,12 +93,12 @@ export class BcLedgerBridge {
   async signTransaction(replyAction: string, hdPath: string, tx: any, hrp: string = 'bnb') {
     try {
       await this.makeApp();
-      const path = hdPath.split(',').map((item) => Number(item));
+      const path = this._toPathArray(hdPath);
       await this.mustHaveApp().showAddress(hrp, path);
       const pubKeyResp = await this.mustHaveApp().getPublicKey(path);
       const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
       const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), path);
-      console.log(res);
+
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
@@ -127,36 +128,20 @@ export class BcLedgerBridge {
   }
 
   async getPublicKey(hdPath: number[]) {
-    return this.mustHaveApp().getPublicKey(hdPath);
+    const pubKeyResp = await this.mustHaveApp().getPublicKey(hdPath);
+    const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
+    return pubKey.encode('hex', true);
   }
 
-  async getAddresses({
-    hdPathStart,
-    hrp = 'bnb',
-    limit = DEFAULT_GET_ADDRESSES_LIMIT,
-  }: {
-    hdPathStart: Array<number>;
-    hrp?: string;
-    limit?: number;
-  }) {
-    if (!Array.isArray(hdPathStart) || hdPathStart.length < 5) {
-      throw new Error('hdPathStart must be an array containing at least 5 path nodes');
-    }
+  async getAddressByHdPath(hdPath: number[], hrp: string) {
+    const response = await this.mustHaveApp().getPublicKey(hdPath);
+    const { pk } = response;
+    const address = crypto.getAddressFromPublicKey((pk as Buffer).toString('hex'), hrp);
+    return address;
+  }
 
-    const addresses = [];
-    let hdPath = hdPathStart;
-    for (let i = 0; i < limit; i++) {
-      if (Number(hdPath[hdPath.length - 1]) > 0x7fffffff) break;
-
-      const response = await this.getPublicKey(hdPath);
-      const { pk } = response;
-      const address = crypto.getAddressFromPublicKey((pk as Buffer).toString('hex'), hrp);
-      addresses.push(address);
-
-      hdPath = hdPathStart.slice();
-      hdPath[hdPath.length - 1] = i + hdPath[hdPath.length - 1] + 1;
-    }
-    return addresses;
+  private _toPathArray(hdPath: string) {
+    return hdPath.split(',').map((i) => Number(i));
   }
 
   ledgerErrToMessage(err: any) {

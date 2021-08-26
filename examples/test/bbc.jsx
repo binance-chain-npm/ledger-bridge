@@ -1,10 +1,11 @@
 import { BBCLedgerBridge } from '../../dist';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Transaction } from '@binance-chain/javascript-sdk';
 import { Button, Card, notification, Input } from 'antd';
 import React from 'react';
 
 const bridge = new BBCLedgerBridge();
+bridge.setHrp('tbnb');
 const fakeTx = new Transaction({
   accountNumber: 1,
   chainId: 'bnbchain-1000',
@@ -14,7 +15,7 @@ const fakeTx = new Transaction({
   sequence: 29,
   source: 0,
 });
-const hdPath = '44/714/0/0/0';
+const baseHdPath = '44/714/0/0/0';
 
 const GetAddressCard = () => {
   const [address, setAddress] = React.useState([]);
@@ -24,8 +25,7 @@ const GetAddressCard = () => {
     setLoading(true);
 
     try {
-      await bridge.unlock();
-      setAddress(await bridge.getFirstPage());
+      setAddress(await bridge.getFirstPage(baseHdPath));
     } catch (e) {
       console.error(e);
       notification.error({ message: e.message || e });
@@ -33,6 +33,12 @@ const GetAddressCard = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      console.log(address[0] && (await bridge.getPublicKey(baseHdPath)));
+    })();
+  }, [address]);
 
   return (
     <Card
@@ -50,7 +56,7 @@ const GetAddressCard = () => {
       {address.map((item) => {
         return (
           <p key={item.address}>
-            {item.address} (balance: {item.balance})
+            {item.address} (balance: {item.hdPath})
           </p>
         );
       })}
@@ -64,10 +70,7 @@ const SignTransactionCard = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      await bridge.unlock();
-
-      const splitHdPath = hdPath.split('/');
-      const _tx = await bridge.signTransaction(fakeTx, splitHdPath);
+      const _tx = await bridge.signTransaction(fakeTx, baseHdPath);
       setTx(_tx);
     } catch (e) {
       console.error(e);
@@ -97,7 +100,7 @@ const SignTransactionCard = () => {
 };
 
 const SignMessage = () => {
-  const [address, setAddress] = useState('');
+  const [hdPath, setHdPath] = useState(baseHdPath);
   const [message, setMessage] = useState('');
   const [signedMsg, setSignedMsg] = useState('');
   const [loading, setLoading] = React.useState(false);
@@ -105,9 +108,7 @@ const SignMessage = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      await bridge.unlock();
-      const splitHdPath = hdPath.split('/');
-      const msg = await bridge.signMessage(message, splitHdPath);
+      const msg = await bridge.signMessage(message, hdPath);
       setSignedMsg(msg);
     } catch (e) {
       console.error(e);
@@ -115,7 +116,7 @@ const SignMessage = () => {
     } finally {
       setLoading(false);
     }
-  }, [address, message]);
+  }, [hdPath, message]);
 
   return (
     <Card
@@ -130,7 +131,7 @@ const SignMessage = () => {
         </div>
       }
     >
-      address: <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+      hdPath: <Input value={hdPath} onChange={(e) => setHdPath(e.target.value)} />
       message: <Input value={message} onChange={(e) => setMessage(e.target.value)} />
       <pre>Signed message: {JSON.stringify(signedMsg, null, 2)}</pre>
     </Card>
