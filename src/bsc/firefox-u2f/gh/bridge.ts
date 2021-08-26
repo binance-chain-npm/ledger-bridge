@@ -1,12 +1,16 @@
-// @ts-nocheck
 import TransportU2F from '@ledgerhq/hw-transport-u2f';
 import LedgerEth from '@ledgerhq/hw-app-eth';
-import { byContractAddress } from '@ledgerhq/hw-app-eth/erc20';
+import Transport from '@ledgerhq/hw-transport';
+import { byContractAddress } from '@ledgerhq/hw-app-eth/lib/erc20';
 
 export default class LedgerBridge {
+  transport: Transport;
+  app: LedgerEth;
+
   constructor() {
     this.addEventListeners();
-    this.useLedgerLive = false;
+    this.transport = {} as Transport;
+    this.app = {} as LedgerEth;
   }
 
   addEventListeners() {
@@ -30,14 +34,6 @@ export default class LedgerBridge {
             case 'ledger-close-bridge':
               this.cleanUp(replyAction);
               break;
-            case 'ledger-sign-typed-data':
-              this.signTypedData(
-                replyAction,
-                params.hdPath,
-                params.domainSeparatorHex,
-                params.hashStructMessageHex,
-              );
-              break;
           }
         }
       },
@@ -45,7 +41,7 @@ export default class LedgerBridge {
     );
   }
 
-  sendMessageToExtension(msg) {
+  sendMessageToExtension(msg: any) {
     window.parent.postMessage(msg, '*');
   }
 
@@ -59,8 +55,8 @@ export default class LedgerBridge {
     }
   }
 
-  cleanUp(replyAction) {
-    this.app = null;
+  cleanUp(replyAction?: string) {
+    this.app = {} as LedgerEth;
     if (this.transport) {
       this.transport.close();
     }
@@ -72,7 +68,7 @@ export default class LedgerBridge {
     }
   }
 
-  async unlock(replyAction, hdPath) {
+  async unlock(replyAction: string, hdPath: string) {
     try {
       await this.makeApp();
       const res = await this.app.getAddress(hdPath, false, true);
@@ -89,13 +85,11 @@ export default class LedgerBridge {
         payload: { error: e.toString() },
       });
     } finally {
-      if (!this.useLedgerLive) {
-        this.cleanUp();
-      }
+      this.cleanUp();
     }
   }
 
-  async signTransaction(replyAction, hdPath, tx, to) {
+  async signTransaction(replyAction: string, hdPath: string, tx: any, to: string) {
     try {
       await this.makeApp();
       if (to) {
@@ -116,13 +110,11 @@ export default class LedgerBridge {
         payload: { error: e.toString() },
       });
     } finally {
-      if (!this.useLedgerLive) {
-        this.cleanUp();
-      }
+      this.cleanUp();
     }
   }
 
-  async signPersonalMessage(replyAction, hdPath, message) {
+  async signPersonalMessage(replyAction: string, hdPath: string, message: string) {
     try {
       await this.makeApp();
 
@@ -140,44 +132,16 @@ export default class LedgerBridge {
         payload: { error: e.toString() },
       });
     } finally {
-      if (!this.useLedgerLive) {
-        this.cleanUp();
-      }
-    }
-  }
-
-  async signTypedData(replyAction, hdPath, domainSeparatorHex, hashStructMessageHex) {
-    try {
-      await this.makeApp();
-      const res = await this.app.signEIP712HashedMessage(
-        hdPath,
-        domainSeparatorHex,
-        hashStructMessageHex,
-      );
-
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: true,
-        payload: res,
-      });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: false,
-        payload: { error: e.toString() },
-      });
-    } finally {
       this.cleanUp();
     }
   }
 
-  ledgerErrToMessage(err) {
-    const isU2FError = (err) => !!err && !!err.metaData;
-    const isStringError = (err) => typeof err === 'string';
-    const isErrorWithId = (err) => err.hasOwnProperty('id') && err.hasOwnProperty('message');
-    const isWrongAppError = (err) => String(err.message || err).includes('6804');
-    const isLedgerLockedError = (err) => err.message && err.message.includes('OpenFailed');
+  ledgerErrToMessage(err: any) {
+    const isU2FError = (err: any) => !!err && !!err.metaData;
+    const isStringError = (err: any) => typeof err === 'string';
+    const isErrorWithId = (err: any) => err.hasOwnProperty('id') && err.hasOwnProperty('message');
+    const isWrongAppError = (err: any) => String(err.message || err).includes('6804');
+    const isLedgerLockedError = (err: any) => err.message && err.message.includes('OpenFailed');
 
     // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
     if (isU2FError(err)) {

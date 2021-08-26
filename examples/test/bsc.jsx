@@ -1,4 +1,4 @@
-import { BSCLedgerBridge } from '../../dist/';
+import { BSCLedgerBridge } from '../../dist';
 import Transaction from 'ethereumjs-tx';
 import { Button, Card, notification, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +18,6 @@ const fakeTx = new Transaction({
   // // EIP 155 chainId - mainnet: 1, ropsten: 3
   chainId: 1,
 });
-const fakeAccountAddress = '0xD39Da5634879d834fD586be37c15cE883e6a8713';
 
 const GetAddressCard = () => {
   const [address, setAddress] = React.useState([]);
@@ -27,9 +26,7 @@ const GetAddressCard = () => {
     setLoading(true);
 
     try {
-      await bridge.unlock();
-      bridge.setHdPath(hdPaths.LedgerLive);
-      setAddress(await bridge.getFirstPage());
+      setAddress(await bridge.getFirstPage(hdPaths.LedgerLive));
     } catch (e) {
       console.error(e);
       notification.error({ message: e.message || e });
@@ -40,7 +37,7 @@ const GetAddressCard = () => {
 
   useEffect(() => {
     (async () => {
-      console.log(address && (await bridge.getPublicKey(address, 0)));
+      console.log(address[0] && (await bridge.getPublicKey(hdPaths.LedgerLive)));
     })();
   }, [address]);
 
@@ -60,7 +57,7 @@ const GetAddressCard = () => {
       {address.map((item) => {
         return (
           <p key={item.address}>
-            {item.address} (balance: {item.balance})
+            {item.address} (hdPath: {item.hdPath})
           </p>
         );
       })}
@@ -75,7 +72,8 @@ const SignTransactionCard = () => {
     try {
       setLoading(true);
       await bridge.unlock();
-      const _tx = await bridge.signTransaction(fakeAccountAddress, fakeTx, 0);
+      bridge.setHdPath(hdPaths.LedgerLive);
+      const _tx = await bridge.signTransaction(fakeTx, bridge.getPathForIndex(0));
 
       setTx(_tx);
     } catch (e) {
@@ -106,7 +104,7 @@ const SignTransactionCard = () => {
 };
 
 const SignMessage = () => {
-  const [address, setAddress] = useState('');
+  const [hdPath, setHdPath] = useState('');
   const [message, setMessage] = useState('');
   const [signedMsg, setSignedMsg] = useState('');
   const [loading, setLoading] = React.useState(false);
@@ -115,7 +113,7 @@ const SignMessage = () => {
     try {
       setLoading(true);
       await bridge.unlock();
-      const msg = await bridge.signMessage(address, message, 0);
+      const msg = await bridge.signMessage(message, hdPath || bridge.getPathForIndex(0));
       setSignedMsg(msg);
     } catch (e) {
       console.error(e);
@@ -123,7 +121,7 @@ const SignMessage = () => {
     } finally {
       setLoading(false);
     }
-  }, [address, message]);
+  }, [hdPath, message]);
 
   return (
     <Card
@@ -138,7 +136,7 @@ const SignMessage = () => {
         </div>
       }
     >
-      address: <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+      hdPath: <Input value={hdPath} onChange={(e) => setHdPath(e.target.value)} />
       message: <Input value={message} onChange={(e) => setMessage(e.target.value)} />
       <pre>Signed message: {JSON.stringify(signedMsg, null, 2)}</pre>
     </Card>

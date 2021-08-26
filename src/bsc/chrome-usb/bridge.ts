@@ -3,7 +3,7 @@ import Transport from '@ledgerhq/hw-transport';
 import LedgerEth from '@ledgerhq/hw-app-eth';
 import { byContractAddress } from '@ledgerhq/hw-app-eth/lib/erc20';
 
-export class LedgerBridge {
+export class ChromeLedgerBridge {
   transport: Transport;
   app: LedgerEth;
 

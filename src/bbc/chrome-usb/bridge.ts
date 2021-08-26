@@ -110,7 +110,7 @@ export class LedgerBridge {
       addresses.push(address);
 
       hdPath = hdPathStart.slice();
-      hdPath[hdPath.length - 1] = i + hdPath[hdPath.length - 1] + 1;
+      hdPath[hdPath.length - 1] = hdPath[hdPath.length - 1] + i + 1;
     }
     return addresses;
   }
