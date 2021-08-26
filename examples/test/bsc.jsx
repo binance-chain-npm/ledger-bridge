@@ -71,8 +71,6 @@ const SignTransactionCard = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      await bridge.unlock();
-      bridge.setHdPath(hdPaths.LedgerLive);
       const _tx = await bridge.signTransaction(fakeTx, bridge.getPathForIndex(0));
 
       setTx(_tx);
@@ -104,7 +102,7 @@ const SignTransactionCard = () => {
 };
 
 const SignMessage = () => {
-  const [hdPath, setHdPath] = useState('');
+  const [hdPath, setHdPath] = useState(hdPaths.LedgerLive);
   const [message, setMessage] = useState('');
   const [signedMsg, setSignedMsg] = useState('');
   const [loading, setLoading] = React.useState(false);
@@ -113,7 +111,7 @@ const SignMessage = () => {
     try {
       setLoading(true);
       await bridge.unlock();
-      const msg = await bridge.signMessage(message, hdPath || bridge.getPathForIndex(0));
+      const msg = await bridge.signMessage(message, hdPath);
       setSignedMsg(msg);
     } catch (e) {
       console.error(e);

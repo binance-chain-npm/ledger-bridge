@@ -2,6 +2,7 @@ import { crypto, Transaction } from '@binance-chain/javascript-sdk';
 import { ChromeLedgerBridge } from './chrome-usb/bridge';
 import { FirefoxLedgerBridge } from './firefox-u2f/bridge';
 import { isChrome } from '../utils/env';
+
 export class BBCLedgerBridge {
   page: number;
   perPage: number;
@@ -30,7 +31,7 @@ export class BBCLedgerBridge {
     return this.bridge
       .signTransaction(this._toPathArray(hdPath), signBytes.toString('hex'), this.hrp)
       .then((payload: any) => {
-        const pubKey = crypto.getPublicKey(payload.pubkey);
+        const pubKey = crypto.getPublicKey(payload.pubKey);
         tx.addSignature(pubKey, Buffer.from(payload.signature, 'hex'));
         return tx;
       })

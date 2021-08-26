@@ -59,13 +59,11 @@ export class ChromeLedgerBridge {
     try {
       await this.makeApp();
       await this.mustHaveApp().showAddress(hrp, hdPath);
-      const pubKeyResp = await this.mustHaveApp().getPublicKey(hdPath);
-      const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
       const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), hdPath);
 
       return {
         signature: res?.signature?.toString('hex'),
-        pubKey: pubKey.encode('hex', true),
+        pubKey: await this.getPublicKey(hdPath),
       };
     } catch (err) {
       throw new Error(this.ledgerErrToMessage(err));

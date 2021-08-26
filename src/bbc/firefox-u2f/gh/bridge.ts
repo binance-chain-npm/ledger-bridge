@@ -95,8 +95,6 @@ export class BcLedgerBridge {
       await this.makeApp();
       const path = this._toPathArray(hdPath);
       await this.mustHaveApp().showAddress(hrp, path);
-      const pubKeyResp = await this.mustHaveApp().getPublicKey(path);
-      const pubKey = crypto.getPublicKey(pubKeyResp!.pk!.toString('hex'));
       const res = await this.mustHaveApp().sign(Buffer.from(tx, 'hex'), path);
 
       this.sendMessageToExtension({
@@ -104,7 +102,7 @@ export class BcLedgerBridge {
         success: true,
         payload: {
           signature: res?.signature?.toString('hex'),
-          pubkey: pubKey.encode('hex', true),
+          pubKey: await this.getPublicKey(path),
         },
       });
     } catch (err) {
