@@ -1,7 +1,6 @@
 import TransportUsb from '@ledgerhq/hw-transport-webusb';
 import Transport from '@ledgerhq/hw-transport';
 import LedgerEth from '@ledgerhq/hw-app-eth';
-import { byContractAddress } from '@ledgerhq/hw-app-eth/lib/erc20';
 
 export class ChromeLedgerBridge {
   transport: Transport;
@@ -43,15 +42,9 @@ export class ChromeLedgerBridge {
     }
   }
 
-  async signTransaction(hdPath: string, tx: string, to: string) {
+  async signTransaction(hdPath: string, tx: string) {
     try {
       await this.makeApp();
-      if (to) {
-        const isKnownERC20Token = byContractAddress(to);
-        if (isKnownERC20Token) {
-          await this.app.provideERC20TokenInformation(isKnownERC20Token);
-        }
-      }
       return await this.app.signTransaction(hdPath, tx);
     } catch (err) {
       throw new Error(this.ledgerErrToMessage(err));

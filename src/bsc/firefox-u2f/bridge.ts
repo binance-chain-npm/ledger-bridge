@@ -39,7 +39,6 @@ export class FirefoxLedgerBridge {
   signTransaction(
     hdPath: string,
     tx: string,
-    to: string,
   ): Promise<{
     s: string;
     v: string;
@@ -50,7 +49,6 @@ export class FirefoxLedgerBridge {
       params: {
         tx,
         hdPath,
-        to,
       },
     });
   }

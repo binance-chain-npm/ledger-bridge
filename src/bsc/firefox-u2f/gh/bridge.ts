@@ -1,7 +1,6 @@
 import TransportU2F from '@ledgerhq/hw-transport-u2f';
 import LedgerEth from '@ledgerhq/hw-app-eth';
 import Transport from '@ledgerhq/hw-transport';
-import { byContractAddress } from '@ledgerhq/hw-app-eth/lib/erc20';
 
 export default class LedgerBridge {
   transport: Transport;
@@ -26,7 +25,7 @@ export default class LedgerBridge {
               this.unlock(replyAction, params.hdPath);
               break;
             case 'ledger-sign-transaction':
-              this.signTransaction(replyAction, params.hdPath, params.tx, params.to);
+              this.signTransaction(replyAction, params.hdPath, params.tx);
               break;
             case 'ledger-sign-personal-message':
               this.signPersonalMessage(replyAction, params.hdPath, params.message);
@@ -89,13 +88,9 @@ export default class LedgerBridge {
     }
   }
 
-  async signTransaction(replyAction: string, hdPath: string, tx: any, to: string) {
+  async signTransaction(replyAction: string, hdPath: string, tx: any) {
     try {
       await this.makeApp();
-      if (to) {
-        const isKnownERC20Token = byContractAddress(to);
-        if (isKnownERC20Token) await this.app.provideERC20TokenInformation(isKnownERC20Token);
-      }
       const res = await this.app.signTransaction(hdPath, tx);
       this.sendMessageToExtension({
         action: replyAction,

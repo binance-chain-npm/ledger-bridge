@@ -67,18 +67,12 @@ export class BSCLedgerBridge {
       tx.r = '0x00';
       tx.s = '0x00';
 
-      return this.bridge
-        .signTransaction(
-          hdPath,
-          tx.serialize().toString('hex'),
-          ethUtil.bufferToHex(tx.to).toLowerCase(),
-        )
-        .then((payload) => {
-          tx.v = Buffer.from(payload.v, 'hex');
-          tx.r = Buffer.from(payload.r, 'hex');
-          tx.s = Buffer.from(payload.s, 'hex');
-          return tx;
-        });
+      return this.bridge.signTransaction(hdPath, tx.serialize().toString('hex')).then((payload) => {
+        tx.v = Buffer.from(payload.v, 'hex');
+        tx.r = Buffer.from(payload.r, 'hex');
+        tx.s = Buffer.from(payload.s, 'hex');
+        return tx;
+      });
     });
   }
 
@@ -86,7 +80,7 @@ export class BSCLedgerBridge {
     return this.unlock(hdPath).then(async (address: any) => {
       const payload = await this.bridge.signPersonalMessage(
         hdPath,
-        ethUtil.stripHexPrefix(message),
+        ethUtil.stripHexPrefix(Buffer.from(message).toString('hex')),
       );
 
       let v = (payload.v - 27).toString(16);

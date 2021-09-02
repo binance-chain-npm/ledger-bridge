@@ -70,7 +70,7 @@
   ],
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@ledgerhq/hw-app-eth": "^6.0.2",
+    "@ledgerhq/hw-app-eth": "^6.5.0",
     "@ledgerhq/hw-transport": "^6.0.2",
     "@ledgerhq/hw-transport-webusb": "^6.0.2",
     "eth-sig-util": "^3.0.1",
