@@ -71,7 +71,7 @@ const SignTransactionCard = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      const _tx = await bridge.signTransaction(fakeTx, bridge.getPathForIndex(0));
+      const _tx = await bridge.signTransaction(fakeTx, "m/44'/60'/0'/0");
 
       setTx(_tx);
     } catch (e) {

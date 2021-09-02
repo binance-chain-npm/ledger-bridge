@@ -106,13 +106,12 @@ export class BSCLedgerBridge {
     return await (await this.bridge.unlock(hdPath)).publicKey;
   }
 
-  getPathForIndex(index: number) {
+  private _getPathForIndex(index: number) {
     // Check if the path is BIP 44 (Ledger Live)
     return this._isLedgerLiveHdPath() ? `m/44'/60'/${index}'/0/0` : `${this.baseHdPath}/${index}`;
   }
 
   private async __getPage(baseHdPath: string, increment: number) {
-    this.setBaseHdPath(baseHdPath);
     this.page += increment;
 
     if (this.page <= 0) {
@@ -121,6 +120,7 @@ export class BSCLedgerBridge {
     const from = (this.page - 1) * this.perPage;
     const to = from + this.perPage;
 
+    this.setBaseHdPath(baseHdPath);
     await this.unlock();
     let accounts;
     if (this._isLedgerLiveHdPath()) {
@@ -136,7 +136,7 @@ export class BSCLedgerBridge {
     const accounts = [];
 
     for (let i = from; i < to; i++) {
-      const path = this.getPathForIndex(i);
+      const path = this._getPathForIndex(i);
       const address = await this.unlock(path);
       accounts.push({
         address,
@@ -148,12 +148,12 @@ export class BSCLedgerBridge {
     return accounts;
   }
 
-  private _getAccountsLegacy(from: number, to: number) {
+  private async _getAccountsLegacy(from: number, to: number) {
     const accounts = [];
 
     for (let i = from; i < to; i++) {
-      const path = `${pathBase}/${i}`;
-      const address = this._addressFromIndex(path);
+      const path = this._getPathForIndex(i);
+      const address = this._addressFromIndex(i);
       accounts.push({
         address,
         balance: 0,
@@ -164,8 +164,8 @@ export class BSCLedgerBridge {
     return accounts;
   }
 
-  private _addressFromIndex(hdPath: string) {
-    const dkey = this.hdk.derive(hdPath);
+  private _addressFromIndex(index: number) {
+    const dkey = this.hdk.derive(`${pathBase}/${index}`);
     const address = ethUtil.publicToAddress(dkey.publicKey, true).toString('hex');
     return ethUtil.toChecksumAddress(`0x${address}`);
   }
