@@ -4,6 +4,7 @@ import sigUtil from 'eth-sig-util';
 import { ChromeLedgerBridge } from './chrome-usb/bridge';
 import { FirefoxLedgerBridge } from './firefox-u2f/bridge';
 import { isChrome } from '../utils/env';
+import { TransactionFactory, Transaction, TypedTransaction } from '@ethereumjs/tx';
 
 const pathBase = 'm';
 const hdPathString = `${pathBase}/44'/60'/0'`;
@@ -61,17 +62,29 @@ export class BSCLedgerBridge {
     return this.__getPage(baseHdPath, -1);
   }
 
-  signTransaction(tx: any, hdPath: string) {
+  signTransaction(tx: Transaction, hdPath: string) {
     return this.unlock().then((_: any) => {
-      tx.v = ethUtil.bufferToHex(tx.getChainId());
-      tx.r = '0x00';
-      tx.s = '0x00';
+      const messageToSign = tx.getMessageToSign(false);
+      const rawTxHex = Buffer.isBuffer(messageToSign)
+        ? messageToSign.toString('hex')
+        : ethUtil.rlp.encode(messageToSign).toString('hex');
 
-      return this.bridge.signTransaction(hdPath, tx.serialize().toString('hex')).then((payload) => {
-        tx.v = Buffer.from(payload.v, 'hex');
-        tx.r = Buffer.from(payload.r, 'hex');
-        tx.s = Buffer.from(payload.s, 'hex');
-        return tx;
+      return this.bridge.signTransaction(hdPath, rawTxHex).then((payload) => {
+        // Because tx will be immutable, first get a plain javascript object that
+        // represents the transaction. Using txData here as it aligns with the
+        // nomenclature of ethereumjs/tx.
+        const txData = tx.toJSON();
+        // The fromTxData utility expects a type to support transactions with a type other than 0
+        // txData.type = tx.type.toString();
+        // The fromTxData utility expects v,r and s to be hex prefixed
+        txData.v = ethUtil.addHexPrefix(payload.v);
+        txData.r = ethUtil.addHexPrefix(payload.r);
+        txData.s = ethUtil.addHexPrefix(payload.s);
+        // Adopt the 'common' option from the original transaction and set the
+        // returned object to be frozen if the original is frozen.
+        return TransactionFactory.fromTxData(txData, {
+          common: tx.common,
+        });
       });
     });
   }
@@ -80,7 +93,7 @@ export class BSCLedgerBridge {
     return this.unlock(hdPath).then(async (address: any) => {
       const payload = await this.bridge.signPersonalMessage(
         hdPath,
-        ethUtil.stripHexPrefix(Buffer.from(message).toString('hex')),
+        message ? ethUtil.stripHexPrefix(Buffer.from(message).toString('hex')) : '',
       );
 
       let v = (payload.v - 27).toString(16);

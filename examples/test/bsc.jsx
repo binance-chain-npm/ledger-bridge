@@ -1,5 +1,5 @@
 import { BSCLedgerBridge } from '../../dist';
-import Transaction from 'ethereumjs-tx';
+import { Transaction } from '@ethereumjs/tx';
 import { Button, Card, notification, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
 
