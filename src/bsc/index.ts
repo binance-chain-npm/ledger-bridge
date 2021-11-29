@@ -91,9 +91,12 @@ export class BSCLedgerBridge {
 
   async signMessage(message: string, hdPath: string) {
     return this.unlock(hdPath).then(async (address: any) => {
+      const _message = ethUtil.isHexString(message)
+        ? message
+        : Buffer.from(message).toString('hex');
       const payload = await this.bridge.signPersonalMessage(
         hdPath,
-        message ? ethUtil.stripHexPrefix(Buffer.from(message).toString('hex')) : '',
+        message ? ethUtil.stripHexPrefix(_message) : '',
       );
 
       let v = (payload.v - 27).toString(16);
