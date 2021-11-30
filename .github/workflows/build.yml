@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1.4.4
+        with:
+          node-version: 12.x
+
+      - name: Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Test
+        run: yarn lint
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
+        continue-on-error: true
+        uses: maxheld83/ghpages@v0.2.1
+        env:
+          BUILD_DIR: dist/gh
+          GH_PAT: ${{ secrets.GH_TOKEN_SEMANTIC_RELEASE }}
+
+      - name: Deploy to NPM
+        run: yarn semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_SEMANTIC_RELEASE }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
