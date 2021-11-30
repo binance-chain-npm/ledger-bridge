@@ -4,7 +4,7 @@ import sigUtil from 'eth-sig-util';
 import { ChromeLedgerBridge } from './chrome-usb/bridge';
 import { FirefoxLedgerBridge } from './firefox-u2f/bridge';
 import { isChrome } from '../utils/env';
-import { TransactionFactory, Transaction, TypedTransaction } from '@ethereumjs/tx';
+import { TransactionFactory, TypedTransaction } from '@ethereumjs/tx';
 
 const pathBase = 'm';
 const hdPathString = `${pathBase}/44'/60'/0'`;
@@ -62,7 +62,7 @@ export class BSCLedgerBridge {
     return this.__getPage(baseHdPath, -1);
   }
 
-  signTransaction(tx: Transaction, hdPath: string) {
+  signTransaction(tx: TypedTransaction, hdPath: string) {
     return this.unlock().then((_: any) => {
       const messageToSign = tx.getMessageToSign(false);
       const rawTxHex = Buffer.isBuffer(messageToSign)
