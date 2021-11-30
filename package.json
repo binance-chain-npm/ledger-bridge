@@ -20,7 +20,7 @@
     "start": "tsdx watch",
     "build": "tsdx build && yarn build:gh",
     "build:gh": "node scripts/build-gh.js && yarn build:example",
-    "build:example": "cd example && yarn build && cp -r dist ../dist/gh/example",
+    "build:example": "cd example && yarn && yarn build && cp -r dist ../dist/gh/example",
     "deploy:gh": "gh-pages -d dist/gh",
     "lint": "tsdx lint src",
     "size": "size-limit",
