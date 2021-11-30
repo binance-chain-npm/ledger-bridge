@@ -16,5 +16,5 @@ await bridge.getFirstPage(ledgerLive);
 1. git clone
 2. yarn install
 3. yarn start
-4. cd examples && yarn dev
+4. cd example && yarn dev
 5. You can visit it by http://localhost:8080/
