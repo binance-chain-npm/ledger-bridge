@@ -16,8 +16,7 @@ jobs:
         with:
           node-version: 14.17.x
 
-      - name: Dependencies
-        run: yarn install --frozen-lockfile
+      - uses: bahmutov/npm-install@v1
 
       - name: Test
         run: yarn lint
