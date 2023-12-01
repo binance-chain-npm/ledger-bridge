@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, notification, Input } from 'antd';
-import { BBCLedgerBridge } from '@binance-chain/ledger-bridge';
-import { Transaction } from '@binance-chain/javascript-sdk';
+import { BBCLedgerBridge } from '@bnb-chain/ledger-bridge';
+import { Transaction } from '@bnb-chain/javascript-sdk';
 
 const bridge = new BBCLedgerBridge();
 bridge.setHrp('tbnb');

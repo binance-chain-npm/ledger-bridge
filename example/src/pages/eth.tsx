@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { BSCLedgerBridge } from '@binance-chain/ledger-bridge';
+import { BSCLedgerBridge } from '@bnb-chain/ledger-bridge';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import Common, { Chain, Hardfork } from '@ethereumjs/common';
 import { Button, Card, notification, Input } from 'antd';
@@ -28,7 +28,9 @@ const fakeTx = FeeMarketEIP1559Transaction.fromTxData(
 );
 
 const GetAddressCard = () => {
-  const [address, setAddress] = useState<{ address: string; hdPath: string }[]>([]);
+  const [address, setAddress] = useState<{ address: string; hdPath: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
   const handle = useCallback(async () => {
     setLoading(true);
@@ -45,7 +47,9 @@ const GetAddressCard = () => {
 
   useEffect(() => {
     (async () => {
-      console.log(address[0] && (await bridge.getPublicKey(hdPaths.LedgerLive)));
+      console.log(
+        address[0] && (await bridge.getPublicKey(hdPaths.LedgerLive)),
+      );
     })();
   }, [address]);
 
@@ -60,9 +64,8 @@ const GetAddressCard = () => {
             Get address
           </Button>
         </div>
-      }
-    >
-      {address.map((item) => (
+      }>
+      {address.map(item => (
         <p key={item.address}>
           {item.address} (hdPath: {item.hdPath})
         </p>
@@ -76,15 +79,20 @@ const SignTransactionCard = () => {
   const [tx, setTx] = useState(JSON.stringify(fakeTx));
   const [signedTx, setSingedTx] = useState('');
 
-  const handleChange = useCallback(async (evt) => {
+  const handleChange = useCallback(async evt => {
     setTx(evt.target.value);
   }, []);
 
   const handleSign = useCallback(async () => {
     try {
       setLoading(true);
-      const fakeTx = FeeMarketEIP1559Transaction.fromTxData(JSON.parse(tx), { common });
-      const _tx = await bridge.signTransaction(fakeTx as any, "m/44'/60'/0'/0/0");
+      const _fakeTx = FeeMarketEIP1559Transaction.fromTxData(JSON.parse(tx), {
+        common,
+      });
+      const _tx = await bridge.signTransaction(
+        _fakeTx as any,
+        "m/44'/60'/0'/0/0",
+      );
 
       console.log(_tx.toJSON());
       setSingedTx(`0x${_tx.serialize().toString('hex')}`);
@@ -97,7 +105,9 @@ const SignTransactionCard = () => {
   }, [tx]);
 
   const haneleSend = useCallback(async () => {
-    const web3 = new Web3('https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
+    const web3 = new Web3(
+      'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    );
 
     const result = await web3.eth.sendSignedTransaction(signedTx);
     console.log(result);
@@ -107,8 +117,7 @@ const SignTransactionCard = () => {
     <Card
       bordered={false}
       loading={loading}
-      title={<div>Ledger ETH SignTransaction (EIP-1559) </div>}
-    >
+      title={<div>Ledger ETH SignTransaction (EIP-1559) </div>}>
       <Input.TextArea
         style={{ width: 300, height: 200, marginBottom: 10 }}
         value={tx}
@@ -157,10 +166,10 @@ const SignMessage = () => {
             Sign
           </Button>
         </div>
-      }
-    >
-      hdPath: <Input value={hdPath} onChange={(e) => setHdPath(e.target.value)} />
-      message: <Input value={message} onChange={(e) => setMessage(e.target.value)} />
+      }>
+      hdPath: <Input value={hdPath} onChange={e => setHdPath(e.target.value)} />
+      message:{' '}
+      <Input value={message} onChange={e => setMessage(e.target.value)} />
       <pre>Signed message: {JSON.stringify(signedMsg, null, 2)}</pre>
     </Card>
   );

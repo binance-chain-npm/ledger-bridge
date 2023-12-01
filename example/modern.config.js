@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import { defineConfig } from '@modern-js/app-tools';
 
 export default defineConfig({
@@ -10,7 +11,7 @@ export default defineConfig({
   },
   source: {
     alias: {
-      '@binance-chain/ledger-bridge': '../',
+      '@bnb-chain/ledger-bridge': '../',
     },
     moduleScopes: ['../'],
   },

@@ -1,4 +1,4 @@
-import { crypto, Transaction } from '@binance-chain/javascript-sdk';
+import { crypto, Transaction } from '@bnb-chain/javascript-sdk';
 import { ChromeLedgerBridge } from './chrome-usb/bridge';
 import { FirefoxLedgerBridge } from './firefox-u2f/bridge';
 import { isChrome } from '../utils/env';

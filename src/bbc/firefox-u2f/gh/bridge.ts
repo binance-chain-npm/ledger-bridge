@@ -1,5 +1,5 @@
-import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
-import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
+import { ledger as Ledger, crypto } from '@bnb-chain/javascript-sdk';
+import LedgerApp from '@bnb-chain/javascript-sdk/lib/ledger/ledger-app';
 import {
   DEFAULT_LEDGER_INTERACTIVE_TIMEOUT,
   DEFAULT_LEDGER_NONINTERACTIVE_TIMEOUT,

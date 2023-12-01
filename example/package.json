@@ -37,8 +37,8 @@
     "dist/"
   ],
   "dependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
-    "@binance-chain/ledger-bridge": "^0.1.9",
+    "@bnb-chain/javascript-sdk": "^4.3.1",
+    "@bnb-chain/ledger-bridge": "file:../",
     "@modern-js/runtime": "^1.0.0",
     "antd": "^4.17.2",
     "react": "^17.0.1",

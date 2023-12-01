@@ -1,9 +1,9 @@
-# @binance-chain/ledger-bridge
+# @bnb-chain/ledger-bridge
 
 ## Usage
 
 ```jsx
-import { BSCLedgerBridge } from '@binance-chain/ledger-bridge';
+import { BSCLedgerBridge } from '@bnb-chain/ledger-bridge';
 
 const bridge = new BSCLedgerBridge();
 const ledgerLive = `m/44'/60'/0'/0/0`;
@@ -18,3 +18,7 @@ await bridge.getFirstPage(ledgerLive);
 3. yarn start
 4. cd example && yarn dev
 5. You can visit it by http://localhost:8080/
+
+## License
+
+See [LICENSE](./LICENSE) for more information.

@@ -1,5 +1,5 @@
-import { ledger as Ledger, crypto } from '@binance-chain/javascript-sdk';
-import LedgerApp from '@binance-chain/javascript-sdk/lib/ledger/ledger-app';
+import { ledger as Ledger, crypto } from '@bnb-chain/javascript-sdk';
+import LedgerApp from '@bnb-chain/javascript-sdk/lib/ledger/ledger-app';
 import Transport from '@ledgerhq/hw-transport';
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import {

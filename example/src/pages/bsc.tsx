@@ -1,4 +1,4 @@
-import { BSCLedgerBridge } from '@binance-chain/ledger-bridge';
+import { BSCLedgerBridge } from '@bnb-chain/ledger-bridge';
 import { Transaction } from '@ethereumjs/tx';
 import { Button, Card, notification, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
