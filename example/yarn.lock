@@ -1162,7 +1162,7 @@
   optionalDependencies:
     "@ledgerhq/hw-transport-node-hid" "^5.10.0"
 
-"@bnb-chain/ledger-bridge@file:../":
+"@bnb-chain/ledger-bridge@file:..":
   version "0.2.0"
   dependencies:
     "@bnb-chain/javascript-sdk" "^4.3.1"

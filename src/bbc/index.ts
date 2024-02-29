@@ -43,8 +43,10 @@ export class BBCLedgerBridge {
   }
 
   async signMessage(message: string, hdPath: string): Promise<string> {
-    console.warn(hdPath, message);
-    throw new Error('signMessage: Not support');
+    // throw new Error('signMessage: Not support');
+    return this.bridge
+      .signTransaction(this._toPathArray(hdPath), message, this.hrp)
+      .then((payload) => payload.signature);
   }
 
   async getPublicKey(hdPath: string) {

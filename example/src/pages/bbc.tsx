@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, notification, Input } from 'antd';
 import { BBCLedgerBridge } from '@bnb-chain/ledger-bridge';
-import { Transaction } from '@bnb-chain/javascript-sdk';
+import { Transaction, crypto } from '@bnb-chain/javascript-sdk';
 
 const bridge = new BBCLedgerBridge();
 bridge.setHrp('tbnb');
@@ -70,6 +70,7 @@ const SignTransactionCard = () => {
       setLoading(true);
       const _tx = await bridge.signTransaction(fakeTx, baseHdPath);
       setTx(_tx);
+      console.log(_tx.serialize());
     } catch (e) {
       console.error(e);
       notification.error({ message: e.message || e });
@@ -105,7 +106,14 @@ const SignMessage = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      const msg = await bridge.signMessage(message, hdPath);
+      const m = fakeTx.getSignBytes().toString('hex');
+
+      const msg = await bridge.signMessage(m, hdPath);
+      fakeTx.addSignature(
+        crypto.getPublicKey(await bridge.getPublicKey(hdPath)),
+        Buffer.from(msg, 'hex'),
+      );
+      console.log(fakeTx.serialize());
       setSignedMsg(msg);
     } catch (e) {
       console.error(e);
