@@ -2,6 +2,7 @@ import { crypto, Transaction } from '@bnb-chain/javascript-sdk';
 import { ChromeLedgerBridge } from './chrome-usb/bridge';
 import { FirefoxLedgerBridge } from './firefox-u2f/bridge';
 import { isChrome } from '../utils/env';
+import { isHex } from '@bnb-chain/javascript-sdk/lib/utils';
 
 export class BBCLedgerBridge {
   page: number;
@@ -44,8 +45,9 @@ export class BBCLedgerBridge {
 
   async signMessage(message: string, hdPath: string): Promise<string> {
     // throw new Error('signMessage: Not support');
+    const _message = isHex(message) ? message : Buffer.from(message).toString('hex');
     return this.bridge
-      .signTransaction(this._toPathArray(hdPath), message, this.hrp)
+      .signTransaction(this._toPathArray(hdPath), _message, this.hrp)
       .then((payload) => payload.signature);
   }
 

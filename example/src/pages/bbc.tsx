@@ -105,7 +105,7 @@ const SignMessage = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      const m = fakeTx.getSignBytes().toString('hex');
+      const m = fakeTx.getSignBytes().toString();
 
       const msg = await bridge.signMessage(m, hdPath);
       fakeTx.addSignature(
