@@ -70,7 +70,6 @@ const SignTransactionCard = () => {
       setLoading(true);
       const _tx = await bridge.signTransaction(fakeTx, baseHdPath);
       setTx(_tx);
-      console.log(_tx.serialize());
     } catch (e) {
       console.error(e);
       notification.error({ message: e.message || e });
