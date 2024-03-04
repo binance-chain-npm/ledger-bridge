@@ -48,7 +48,7 @@ export class BBCLedgerBridge {
     const _message = isHex(message) ? message : Buffer.from(message).toString('hex');
     return this.bridge
       .signTransaction(this._toPathArray(hdPath), _message, this.hrp)
-      .then((payload) => payload.signature);
+      .then((payload) => `0x${payload.signature}`);
   }
 
   async getPublicKey(hdPath: string) {

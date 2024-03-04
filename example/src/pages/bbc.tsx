@@ -110,7 +110,7 @@ const SignMessage = () => {
       const msg = await bridge.signMessage(m, hdPath);
       fakeTx.addSignature(
         crypto.getPublicKey(await bridge.getPublicKey(hdPath)),
-        Buffer.from(msg, 'hex'),
+        Buffer.from(msg.substr(2), 'hex'),
       );
       console.log(fakeTx.serialize());
       setSignedMsg(msg);
