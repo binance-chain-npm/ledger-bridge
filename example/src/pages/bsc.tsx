@@ -2,22 +2,33 @@ import { BSCLedgerBridge } from '@bnb-chain/ledger-bridge';
 import { Transaction } from '@ethereumjs/tx';
 import { Button, Card, notification, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
+import Common, { Hardfork } from '@ethereumjs/common';
 
 const hdPaths = {
   LedgerLive: `m/44'/60'/0'/0/0`,
   Legacy: `m/44'/60'/0'`,
 };
 const bridge = new BSCLedgerBridge();
-const fakeTx = new Transaction({
-  nonce: '0x00',
-  gasPrice: '0x09184e72a000',
-  gasLimit: '0x2710',
-  to: '0x0000000000000000000000000000000000000000',
-  value: '0x00',
-  data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057',
-  // // EIP 155 chainId - mainnet: 1, ropsten: 3
-  // chainId: 1,
-});
+const fakeTx = new Transaction(
+  {
+    nonce: '0x00',
+    gasPrice: '0x09184e72a000',
+    gasLimit: '0x2710',
+    to: '0x0000000000000000000000000000000000000000',
+    value: '0x00',
+    data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057',
+    type: '0x01',
+  },
+  {
+    common: Common.custom(
+      { chainId: 56 },
+      {
+        baseChain: 'mainnet',
+        hardfork: Hardfork.London,
+      },
+    ),
+  },
+);
 
 const GetAddressCard = () => {
   const [address, setAddress] = React.useState<
@@ -72,7 +83,7 @@ const SignTransactionCard = () => {
   const handle = React.useCallback(async () => {
     try {
       setLoading(true);
-      const _tx = await bridge.signTransaction(fakeTx, "m/44'/60'/0'/0");
+      const _tx = await bridge.signTransaction(fakeTx, "m/44'/60'/0'/0/0");
 
       setTx(_tx);
     } catch (e) {

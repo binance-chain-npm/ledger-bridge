@@ -112,7 +112,7 @@ const SignMessage = () => {
         crypto.getPublicKey(await bridge.getPublicKey(hdPath)),
         Buffer.from(msg.substr(2), 'hex'),
       );
-      console.log(fakeTx.serialize());
+      console.log(fakeTx.serialize(), msg);
       setSignedMsg(msg);
     } catch (e) {
       console.error(e);
