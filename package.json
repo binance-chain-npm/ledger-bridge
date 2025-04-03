@@ -71,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@bnb-chain/javascript-sdk": "^4.3.1",
+    "@bnb-chain/javascript-sdk": "^4.4.4",
     "@ethereumjs/tx": "^3.4.0",
     "@ledgerhq/hw-app-eth": "^6.17.0",
     "@ledgerhq/hw-transport": "^6.11.2",
